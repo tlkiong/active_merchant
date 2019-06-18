@@ -112,18 +112,20 @@ module ActiveMerchant #:nodoc:
         # def add_payment(post, payment)
         # end
 
-        # def parse(body)
-        #   {}
-        # end
+        def parse(response)
+          # Example of response will be: 
+          #     result=0&order_code=&error_type=S&error_code=S20&error_info=S20010001
+
+          # CGI.parse will return a Hash with its value as an array
+          response_hash = CGI::parse(response)
+          response_hash.transform_values(&:first)
+        end
 
         def commit(parameters)
           url = (test? ? test_url : live_url)
           params = parameters.to_json
           response = ssl_post(url, params, request_headers)
-
-          # Example of response will be: 
-          #     result=0&order_code=&error_type=S&error_code=S20&error_info=S20010001
-          response_hash = CGI::parse(response)
+          response_hash = parse(response)
 
           Response.new(
             success_from(response_hash),
@@ -138,12 +140,12 @@ module ActiveMerchant #:nodoc:
         end
 
         def success_from(response_hash)
-          response_hash['result'].first === '1' # Value is either 0 / 1. 0 means have error
+          response_hash['result'] === '1' # Value is either 0 / 1. 0 means have error
         end
 
         def message_from(response_hash)
           if success_from(response_hash)
-            # 
+            response_hash['order_code']
           else
             error_message_from(response_hash)
           end
@@ -164,13 +166,13 @@ module ActiveMerchant #:nodoc:
 
         def error_message_from(response_hash)
           unless success_from(response_hash)
-            ERROR_CODES[response_hash['error_info'].first][@lang]
+            ERROR_CODES[response_hash['error_info']][@lang]
           end
         end
 
         def error_code_from(response_hash)
           unless success_from(response_hash)
-            response_hash['error_info'].first
+            response_hash['error_info']
           end
         end
     end
