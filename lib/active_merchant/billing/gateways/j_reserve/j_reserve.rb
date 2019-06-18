@@ -1,8 +1,11 @@
 require 'cgi'
+require 'active_merchant/billing/gateways/j_reserve/j_reserve_codes'
 
 module ActiveMerchant #:nodoc:
   module Billing #:nodoc:
     class JReserveGateway < Gateway
+      include ActiveMerchant::Billing::JReserveCodes
+
       self.test_url = 'https://test.j-reserve.com:10443/ros/settlement.php'
       self.live_url = 'https://credit.j-reserve.com/ros/settlement.php'
 
@@ -14,16 +17,12 @@ module ActiveMerchant #:nodoc:
       self.display_name = 'J-Reserve'
       self.money_format = :cents
 
-      STANDARD_ERROR_CODE_MAPPING = {
-        'S10000000' => 'A system error has occurred.',
-        'S10000001' => 'Temporary sales processing failed',
-        'S10000002' => 'Cancel processing failed',
-        'S20010001' => 'Processing category (job) not found'
-      }
-
       def initialize(options={})
         requires!(options, :member_code)
         @member_code = options[:member_code]
+        # Language code follows ISO 639-1 standard
+        @lang = options[:lang] # primarily used for messages returned API
+        
         raise ArgumentError, "member_code must be a number" unless @member_code.is_a? Numeric
 
         super
@@ -165,7 +164,7 @@ module ActiveMerchant #:nodoc:
 
         def error_message_from(response_hash)
           unless success_from(response_hash)
-            STANDARD_ERROR_CODE_MAPPING[response_hash['error_info'].first]
+            ERROR_CODES[response_hash['error_info'].first][@lang]
           end
         end
 
