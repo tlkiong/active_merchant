@@ -435,6 +435,7 @@ iveri:
 # Working credentials, no need to replace
 j_reserve:
   member_code: 9999999999
+  lang: en
 
 jetpay:
   login: TESTTERMINAL
