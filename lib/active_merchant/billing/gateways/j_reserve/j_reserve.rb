@@ -21,7 +21,7 @@ module ActiveMerchant #:nodoc:
         requires!(options, :member_code)
         @member_code = options[:member_code]
         # Language code follows ISO 639-1 standard
-        @lang = options[:lang] # primarily used for messages returned API
+        @lang = options[:lang] || 'ja' # primarily used for messages returned API
         
         raise ArgumentError, "member_code must be a number" unless @member_code.is_a? Numeric
 
