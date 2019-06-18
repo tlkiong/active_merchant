@@ -34,15 +34,10 @@ module ActiveMerchant #:nodoc:
         commit(post)
       end
 
-      # def authorize(money, payment, options={})
-      #   post = {}
-      #   add_invoice(post, money, options)
-      #   add_payment(post, payment)
-      #   add_address(post, payment, options)
-      #   add_customer_data(post, options)
-
-      #   commit('authonly', post)
-      # end
+      def authorize(order_code)
+        post = new_post('COMMIT', { order_code: order_code })
+        commit(post)
+      end
 
       # def capture(money, authorization, options={})
       #   commit('capture', post)
@@ -52,9 +47,10 @@ module ActiveMerchant #:nodoc:
       #   commit('refund', post)
       # end
 
-      # def void(authorization, options={})
-      #   commit('void', post)
-      # end
+      def void(order_code)
+        post = new_post('VOID', { order_code: order_code })
+        commit(post)
+      end
 
       # def verify(credit_card, options={})
       #   MultiResponse.run(:use_first_response) do |r|
@@ -72,24 +68,7 @@ module ActiveMerchant #:nodoc:
       # end
 
       private
-
-        # values are:
-        #   {
-        #     member_code: number,
-        #     job: string,
-        #     proposal_code: string,
-        #     card_brand: string,
-        #     card_number: number,
-        #     expire_year: number,
-        #     expire_month: number,
-        #     amount: number,
-        #     cancel_base_fee: number,
-        #     sales_start: string,
-        #     sales_end: string,
-        #     customer_email: string,
-        #     customer_name: string,
-        #   }
-        def new_post(job_type, options)
+        def new_post(job_type, options={})
           post = {
             member_code: @member_code,
             job: job_type
