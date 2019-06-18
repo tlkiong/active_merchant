@@ -28,27 +28,26 @@ module ActiveMerchant #:nodoc:
         super
       end
 
-      def purchase(options)
-        requires!(options, :proposal_code, :card_brand, :card_number, :expire_year, :expire_month, :amount, :cancel_base_fee, :sales_start, :sales_end, :customer_email, :customer_name)
-        post = new_post('AUTH', options)
-        commit(post)
-      end
-
-      def authorize(order_code)
-        post = new_post('COMMIT', { order_code: order_code })
-        commit(post)
-      end
-
-      # def capture(money, authorization, options={})
-      #   commit('capture', post)
+      # def purchase(options)
       # end
+
+      def authorize(options)
+        requires!(options, :proposal_code, :card_brand, :card_number, :expire_year, :expire_month, :amount, :cancel_base_fee, :sales_start, :sales_end, :customer_email, :customer_name)
+        post = init_post('AUTH', options)
+        commit(post)
+      end
+
+      def capture(order_code)
+        post = init_post('COMMIT', { order_code: order_code })
+        commit(post)
+      end
 
       # def refund(money, authorization, options={})
       #   commit('refund', post)
       # end
 
       def void(order_code)
-        post = new_post('VOID', { order_code: order_code })
+        post = init_post('VOID', { order_code: order_code })
         commit(post)
       end
 
@@ -68,7 +67,7 @@ module ActiveMerchant #:nodoc:
       # end
 
       private
-        def new_post(job_type, options={})
+        def init_post(job_type, options={})
           post = {
             member_code: @member_code,
             job: job_type

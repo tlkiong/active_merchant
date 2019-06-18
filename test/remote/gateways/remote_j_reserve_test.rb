@@ -14,25 +14,8 @@ class RemoteJReserveTest < Test::Unit::TestCase
     }
   end
 
-  def test_successful_purchase
-    purchase_options = {
-      :proposal_code => "testCode1",
-      :card_brand => "VISA",
-      :card_number => @test_val[:card][:number],
-      :expire_year => @test_val[:card][:expire_year],
-      :expire_month => @test_val[:card][:expire_month],
-      :amount => 1000,
-      :cancel_base_fee => 100,
-      :sales_start => (Date.today + 1).strftime("%Y-%m-%d"),
-      :sales_end => (Date.today + 2).strftime("%Y-%m-%d"),
-      :customer_email => "test@gmail.com",
-      :customer_name => "Test User"
-    }
-    
-    response = @gateway.purchase(purchase_options)
-    assert_success response
-    assert_equal 'REPLACE WITH SUCCESS MESSAGE', response.message
-  end
+  # def test_successful_purchase
+  # end
 
   # def test_successful_purchase_with_more_options
   #   options = {
@@ -53,14 +36,29 @@ class RemoteJReserveTest < Test::Unit::TestCase
   #   assert_equal 'REPLACE WITH FAILED PURCHASE MESSAGE', response.message
   # end
 
-  # def test_successful_authorize_and_capture
-  #   auth = @gateway.authorize(@amount, @credit_card, @options)
-  #   assert_success auth
+  def test_successful_authorize_and_capture
+    purchase_options = {
+      :proposal_code => "testCode1",
+      :card_brand => "VISA",
+      :card_number => @test_val[:card][:number],
+      :expire_year => @test_val[:card][:expire_year],
+      :expire_month => @test_val[:card][:expire_month],
+      :amount => 1000,
+      :cancel_base_fee => 100,
+      :sales_start => (Date.today + 1).strftime("%Y-%m-%d"),
+      :sales_end => (Date.today + 2).strftime("%Y-%m-%d"),
+      :customer_email => "test@gmail.com",
+      :customer_name => "Test User"
+    }
+    
+    response = @gateway.authorize(purchase_options)
+    assert_success response
+    assert_equal '1', response.params['result']
 
-  #   assert capture = @gateway.capture(@amount, auth.authorization)
-  #   assert_success capture
-  #   assert_equal 'REPLACE WITH SUCCESS MESSAGE', capture.message
-  # end
+    capture = @gateway.capture(response.message)
+    assert_success capture
+    assert_equal 'REPLACE WITH SUCCESS MESSAGE', capture.message
+  end
 
   # def test_failed_authorize
   #   response = @gateway.authorize(@amount, @declined_card, @options)
