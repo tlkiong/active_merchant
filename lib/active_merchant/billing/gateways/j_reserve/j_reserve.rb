@@ -109,7 +109,7 @@ module ActiveMerchant #:nodoc:
             success_from(response_hash),
             message_from(response_hash),
             response_hash,
-            # authorization: authorization_from(response),
+            authorization: authorization_from(response),
             # avs_result: AVSResult.new(code: response["some_avs_response_key"]),
             # cvv_result: CVVResult.new(response["some_cvv_response_key"]),
             test: test?,
@@ -118,7 +118,7 @@ module ActiveMerchant #:nodoc:
         end
 
         def success_from(response_hash)
-          response_hash['result'] === '1' # Value is either 0 / 1. 0 means have error
+          response_hash['result'] === '1' # Value is either 0 / 1. 0 = error
         end
 
         def message_from(response_hash)
@@ -129,8 +129,9 @@ module ActiveMerchant #:nodoc:
           end
         end
 
-        # def authorization_from(response)
-        # end
+        def authorization_from(response_hash)
+          response_hash['order_code']
+        end
 
         # def post_data(action, parameters = {})
         #   JSON.generate(parameters)
