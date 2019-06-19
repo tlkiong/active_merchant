@@ -17,6 +17,26 @@ module ActiveMerchant #:nodoc:
       self.display_name = 'J-Reserve'
       self.money_format = :cents
 
+      STANDARD_ERROR_CODE_MAPPING = {
+        'S20060001' => STANDARD_ERROR_CODE[:incorrect_number],
+        'S20060002' => STANDARD_ERROR_CODE[:invalid_number],
+        'S20070001' => STANDARD_ERROR_CODE[:invalid_expiry_date],
+        'S20070002' => STANDARD_ERROR_CODE[:invalid_expiry_date],
+        'S20080001' => STANDARD_ERROR_CODE[:invalid_expiry_date],
+        'S20080002' => STANDARD_ERROR_CODE[:invalid_expiry_date],
+        'S10000001' => STANDARD_ERROR_CODE[:processing_error],
+
+        # 'invalid_cvc' => STANDARD_ERROR_CODE[:invalid_cvc],
+        # 'expired_card' => STANDARD_ERROR_CODE[:expired_card],
+        # 'incorrect_cvc' => STANDARD_ERROR_CODE[:incorrect_cvc],
+        # 'incorrect_zip' => STANDARD_ERROR_CODE[:incorrect_zip],
+        # 'card_declined' => STANDARD_ERROR_CODE[:card_declined],
+        # 'call_issuer' => STANDARD_ERROR_CODE[:call_issuer],
+        # 'incorrect_pin' => STANDARD_ERROR_CODE[:incorrect_pin],
+        # 'test_mode_live_card' => STANDARD_ERROR_CODE[:test_mode_live_card],
+        # 'pickup_card' => STANDARD_ERROR_CODE[:pickup_card]
+      }.freeze
+
       def initialize(options={})
         requires!(options, :member_code)
         @member_code = options[:member_code]
@@ -151,7 +171,7 @@ module ActiveMerchant #:nodoc:
 
         def error_code_from(response_hash)
           unless success_from(response_hash)
-            response_hash['error_info']
+            STANDARD_ERROR_CODE_MAPPING[response_hash['error_info']]
           end
         end
     end
