@@ -8,7 +8,7 @@ class RemoteJReserveTest < Test::Unit::TestCase
     @test_val = {
       :card => {
         :number => 4111111111111111,
-        :expire_year => default_expiration_date.year,
+        :expire_year => default_expiration_date.strftime('%y'), # Has to be 2 digit
         :expire_month => default_expiration_date.month
       }
     }
@@ -40,42 +40,44 @@ class RemoteJReserveTest < Test::Unit::TestCase
     purchase_options = {
       :proposal_code => "testCode1",
       :card_brand => "VISA",
-      :card_number => @test_val[:card][:number],
+      :card_no => @test_val[:card][:number],
       :expire_year => @test_val[:card][:expire_year],
       :expire_month => @test_val[:card][:expire_month],
       :amount => 1000,
       :cancel_base_fee => 100,
       :sales_start => (Date.today + 1).strftime("%Y-%m-%d"),
       :sales_end => (Date.today + 2).strftime("%Y-%m-%d"),
-      :customer_email => "test@gmail.com",
+      :customer_mail => "test@gmail.com",
       :customer_name => "Test User"
     }
     
     response = @gateway.authorize(purchase_options)
+
     assert_success response
     assert_equal '1', response.params['result']
 
-    capture = @gateway.capture(response.message)
+    capture = @gateway.capture(response.authorization)
     assert_success capture
-    assert_equal 'REPLACE WITH SUCCESS MESSAGE', capture.message
+    assert_equal response.authorization, capture.authorization
   end
 
   def test_failed_authorize
     purchase_options = {
       :proposal_code => "testCode1",
-      :card_brand => "VISA",
-      :card_number => @test_val[:card][:number],
+      :card_brand => "MASTERCARD",
+      :card_no => @test_val[:card][:number],
       :expire_year => @test_val[:card][:expire_year],
       :expire_month => @test_val[:card][:expire_month],
       :amount => 1000,
       :cancel_base_fee => 100,
       :sales_start => (Date.today + 1).strftime("%Y-%m-%d"),
       :sales_end => (Date.today + 2).strftime("%Y-%m-%d"),
-      :customer_email => "test@gmail.com",
+      :customer_mail => "test@gmail.com",
       :customer_name => "Test User"
     }
     
     response = @gateway.authorize(purchase_options)
+
     assert_failure response
     assert_equal '0', response.params['result']
   end

@@ -52,7 +52,10 @@ module ActiveMerchant #:nodoc:
       # end
 
       def authorize(options)
-        requires!(options, :proposal_code, :card_brand, :card_number, :expire_year, :expire_month, :amount, :cancel_base_fee, :sales_start, :sales_end, :customer_email, :customer_name)
+        requires!(options, :proposal_code, :card_brand, :card_no, :expire_year, :expire_month, :amount, :cancel_base_fee, :sales_start, :sales_end, :customer_mail, :customer_name)
+        
+        raise ArgumentError, "expire_year must be a 2 digit number" unless options[:expire_year].to_s.length === 2
+
         post = init_post('AUTH', options)
         commit(post)
       end
@@ -121,7 +124,8 @@ module ActiveMerchant #:nodoc:
 
         def commit(parameters)
           url = (test? ? test_url : live_url)
-          params = parameters.to_json
+
+          params = URI.encode_www_form(parameters) # This will make it into x-www-form-url-encoded format
           response = ssl_post(url, params, request_headers)
           response_hash = parse(response)
 
@@ -129,7 +133,7 @@ module ActiveMerchant #:nodoc:
             success_from(response_hash),
             message_from(response_hash),
             response_hash,
-            authorization: authorization_from(response),
+            authorization: authorization_from(response_hash),
             # avs_result: AVSResult.new(code: response["some_avs_response_key"]),
             # cvv_result: CVVResult.new(response["some_cvv_response_key"]),
             test: test?,
@@ -159,7 +163,8 @@ module ActiveMerchant #:nodoc:
 
         def request_headers()
           {
-            'Content-Type' => 'application/json',
+            'Content-Type' => 'application/x-www-form-urlencoded',
+
           }
         end
 
