@@ -61,6 +61,31 @@ class RemoteJReserveTest < Test::Unit::TestCase
     assert_equal response.authorization, capture.authorization
   end
 
+  def test_successful_authorize_and_void
+    purchase_options = {
+      :proposal_code => "testCode1",
+      :card_brand => "VISA",
+      :card_no => @test_val[:card][:number],
+      :expire_year => @test_val[:card][:expire_year],
+      :expire_month => @test_val[:card][:expire_month],
+      :amount => 1000,
+      :cancel_base_fee => 100,
+      :sales_start => (Date.today + 1).strftime("%Y-%m-%d"),
+      :sales_end => (Date.today + 2).strftime("%Y-%m-%d"),
+      :customer_mail => "test@gmail.com",
+      :customer_name => "Test User"
+    }
+    
+    response = @gateway.authorize(purchase_options)
+
+    assert_success response
+    assert_equal '1', response.params['result']
+
+    void = @gateway.void(response.authorization)
+    assert_success void
+    assert_equal response.authorization, void.authorization
+  end
+
   def test_failed_authorize
     purchase_options = {
       :proposal_code => "testCode1",
